@@ -1,38 +1,39 @@
 "use client"
-import React from 'react'
-import { BarChart } from '@mui/x-charts/BarChart';
-import { PieChart } from "@mui/x-charts/PieChart";
-const page = () => {const data = [
-  { id: 0, value: 10, label: "series A" },
-  { id: 1, value: 15, label: "series B" },
-  { id: 2, value: 20, label: "series C" },
-];
+import * as React from "react";
+import { BarChart } from "@mui/x-charts/BarChart";
+import { axisClasses } from "@mui/x-charts/ChartsAxis";
+import sample from "@/data/sample";
+
+
+const valueFormatter = (value) => value.toFixed(2); // Format the value to two decimal places
+
+export default function BarsDataset() {
+  // Transform sample data into series format
+  const series = [
+    { dataKey: "yhat_lower", label: "Lowest Probability", valueFormatter },
+    { dataKey: "yhat", label: "Prediction", valueFormatter },
+    { dataKey: "yhat_upper", label: "Highest Probability", valueFormatter },
+  ];
+
+  // Transform sample data into the format required by the chart
+  const chartDataset = sample.map((data) => ({
+    ...data,
+    ds: data.ds, // This ensures 'ds' remains as it is in sample
+  }));
 
   return (
-    <div className="w-full h-full ">
-      <BarChart
-        xAxis={[{ scaleType: "band", data: ["Grocery", "Dairy", "Drinks"] }]}
-        series={[{ data: [4, 3, 5] }, { data: [1, 6, 3] }, { data: [2, 5, 6] }]}
-        width={500}
-        height={300}
-      />
-      <PieChart
-        series={[
-          {
-            data,
-            highlightScope: { faded: "global", highlighted: "item" },
-            faded: { innerRadius: 30, additionalRadius: -30, color: "gray" },
-          },
-        ]}
-        height={200}
-      />
-    </div>
+    <BarChart
+      dataset={chartDataset}
+      xAxis={[{ scaleType: "band", dataKey: "ds" }]}
+      series={series}
+      yAxis={[{ label: "Value" }]} // Adjust yAxis label as per your data
+      width={800} // Adjust chart width as needed
+      height={400} // Adjust chart height as needed
+      sx={{
+        [`.${axisClasses.left} .${axisClasses.label}`]: {
+          transform: "translate(-20px, 0)",
+        },
+      }}
+    />
   );
 }
-
-export default page
-
-
-
-
-
