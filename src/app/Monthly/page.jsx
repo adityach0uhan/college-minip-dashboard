@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useState, useEffect } from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
 import sample from "@/data/sample";
 import InputLabel from "@mui/material/InputLabel";
@@ -10,9 +11,9 @@ import Select from "@mui/material/Select";
 const valueFormatter = (value) => value.toFixed(1); // Format the value to two decimal places
 
 export default function Page() {
-  const [products, setProducts] = React.useState("");
-  const [month, setMonth] = React.useState("2024-06");
-  const [monthData, setMonthData] = React.useState([]);
+  const [products, setProducts] = useState("");
+  const [month, setMonth] = useState("2024-06");
+  const [monthData, setMonthData] = useState([]);
 
   const productChange = (event) => {
     setProducts(event.target.value);
@@ -39,7 +40,7 @@ export default function Page() {
       }));
     setMonthData(data);
   };
-  React.useEffect(() => {
+  useEffect(() => {
     setMonth("2024-06")
   },[])
 

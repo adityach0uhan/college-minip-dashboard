@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
+import { useState, useEffect } from "react";
 import sample from "@/data/sample";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -9,7 +10,7 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 const valueFormatter = (value) => value.toFixed(1); // Format the value to two decimal places
 
 export default function page() {
-   const [products, setProducts] = React.useState('');
+   const [products, setProducts] = useState('');
 
   const handleChange = (event) => {
     setProducts(event.target.value );
