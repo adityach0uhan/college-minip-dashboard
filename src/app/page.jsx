@@ -9,7 +9,7 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 const valueFormatter = (value) => value.toFixed(1); // Format the value to two decimal places
 
-export default function page() {
+export default function Home() {
    const [products, setProducts] = useState('');
 
   const handleChange = (event) => {
