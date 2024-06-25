@@ -1,6 +1,6 @@
 'use client';
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BarChart } from '@mui/x-charts/BarChart';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -12,9 +12,13 @@ import product3 from '../../data/json/output/output3.js';
 const valueFormatter = (value) => value.toFixed(1);
 
 export default function Page() {
-    const [products, setProducts] = useState('');
-    const [month, setMonth] = useState('');
+    const [products, setProducts] = useState('Product1'); // Default product set to Product1
+    const [month, setMonth] = useState(new Date().getMonth() + 1); // Default month set to current month (1-indexed)
     const [monthData, setMonthData] = useState([]);
+
+    useEffect(() => {
+        getData(month); // Fetch data initially for the default month
+    }, []); // Empty dependency array to run once on component mount
 
     const productChange = (event) => {
         const selectedProduct = event.target.value;
@@ -24,7 +28,6 @@ export default function Page() {
     const monthChange = (event) => {
         let selectedMonth = event.target.value;
         setMonth(selectedMonth);
-        getData(selectedMonth);
     };
 
     const series = [
@@ -45,8 +48,11 @@ export default function Page() {
         }
     ];
 
+    useEffect(() => {
+        getData(month); // Fetch data whenever month changes
+    }, [month]); // Depend on month state change
+
     const getData = (selectedMonth) => {
-        setMonthData('')
         let data = [];
         if (products === 'Product1') {
             data = product2
