@@ -1,102 +1,132 @@
-"use client";
-import * as React from "react";
-import { useState, useEffect } from "react";
-import { BarChart } from "@mui/x-charts/BarChart";
-import sample from "@/data/sample";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
+'use client';
+import * as React from 'react';
+import { useState } from 'react';
+import { BarChart } from '@mui/x-charts/BarChart';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import product2 from '../../data/json/output/output2.js';
+import product3 from '../../data/json/output/output3.js';
 
-const valueFormatter = (value) => value.toFixed(1); // Format the value to two decimal places
+const valueFormatter = (value) => value.toFixed(1);
 
 export default function Page() {
-  const [products, setProducts] = useState("");
-  const [month, setMonth] = useState("2024-06");
-  const [monthData, setMonthData] = useState([]);
+    const [products, setProducts] = useState('');
+    const [month, setMonth] = useState('');
+    const [monthData, setMonthData] = useState([]);
 
-  const productChange = (event) => {
-    setProducts(event.target.value);
-  };
+    const productChange = (event) => {
+        const selectedProduct = event.target.value;
+        setProducts(selectedProduct);
+    };
 
-  const monthChange = (event) => {
-    const selectedMonth = event.target.value;
-    setMonth(selectedMonth);
-    getData(`2024-0${selectedMonth}`);
-  };
+    const monthChange = (event) => {
+        let selectedMonth = event.target.value;
+        setMonth(selectedMonth);
+        getData(selectedMonth);
+    };
 
-  const series = [
-    { dataKey: "yhat_lower", label: "Lowest Probability", valueFormatter },
-    { dataKey: "yhat", label: "Prediction", valueFormatter },
-    { dataKey: "yhat_upper", label: "Highest Probability", valueFormatter },
-  ];
+    const series = [
+        {
+            dataKey: 'yhat_lower',
+            label: 'Lowest Probability',
+            valueFormatter
+        },
+        {
+            dataKey: 'yhat',
+            label: 'Prediction',
+            valueFormatter
+        },
+        {
+            dataKey: 'yhat_upper',
+            label: 'Highest Probability',
+            valueFormatter
+        }
+    ];
 
-  const getData = (month) => {
-    const data = sample
-      .filter((item) => item.ds.startsWith(month ))
-      .map((item) => ({
-        ...item,
-        ds: item.ds,
-      }));
-    setMonthData(data);
-  };
-  useEffect(() => {
-    setMonth("2024-06")
-  },[])
+    const getData = (selectedMonth) => {
+        setMonthData('')
+        let data = [];
+        if (products === 'Product1') {
+            data = product2
+                .filter((item) =>
+                    item.ds.startsWith(
+                        `2024-${selectedMonth.toString().padStart(2, '0')}`
+                    )
+                )
+                .map((item) => ({
+                    ...item,
+                    ds: item.ds
+                }));
+        } else if (products === 'Product2') {
+            data = product3
+                .filter((item) =>
+                    item.ds.startsWith(
+                        `2024-${selectedMonth.toString().padStart(2, '0')}`
+                    )
+                )
+                .map((item) => ({
+                    ...item,
+                    ds: item.ds
+                }));
+        }
 
-  return (
-    <>
-      <div className="w-full h-12 mt-7 ">
-        <div className="w-1/3 flex gap-5">
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Products</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={products}
-              label="Products"
-              onChange={productChange}
-            >
-              <MenuItem value={10}>Grocery</MenuItem>
-              <MenuItem value={20}>Dairy</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Month</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={month}
-              label="Months"
-              onChange={monthChange}
-            >
-              <MenuItem value={1}>Jan</MenuItem>
-              <MenuItem value={2}>Feb</MenuItem>
-              <MenuItem value={3}>Mar</MenuItem>
-              <MenuItem value={4}>Apr</MenuItem>
-              <MenuItem value={5}>May</MenuItem>
-              <MenuItem value={6}>June</MenuItem>
-              <MenuItem value={7}>July</MenuItem>
-              <MenuItem value={8}>Aug</MenuItem>
-              <MenuItem value={9}>Sep</MenuItem>
-              <MenuItem value={10}>Oct</MenuItem>
-              <MenuItem value={11}>Nov</MenuItem>
-              <MenuItem value={12}>Dec</MenuItem>
-            </Select>
-          </FormControl>
-        </div>
-      </div>
-      <div className="mt-6">
-        <BarChart
-          dataset={monthData}
-          xAxis={[{ scaleType: "band", dataKey: "ds" }]}
-          series={series}
-          yAxis={[{ label: "Value" }]}
-          width={1200}
-          height={400}
-        />
-      </div>
-    </>
-  );
+        setMonthData(data);
+    };
+
+    return (
+        <>
+            <div className='w-full h-12 mt-7 '>
+                <div className='w-1/3 flex gap-5'>
+                    <FormControl fullWidth>
+                        <InputLabel id='products-select-label'>
+                            Products
+                        </InputLabel>
+                        <Select
+                            labelId='products-select-label'
+                            id='products-select'
+                            value={products}
+                            label='Products'
+                            onChange={productChange}>
+                            <MenuItem value='Product1'>Product 1</MenuItem>
+                            <MenuItem value='Product2'>Product 2</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth>
+                        <InputLabel id='month-select-label'>Month</InputLabel>
+                        <Select
+                            labelId='month-select-label'
+                            id='month-select'
+                            value={month}
+                            label='Month'
+                            onChange={monthChange}>
+                            <MenuItem value={1}>January</MenuItem>
+                            <MenuItem value={2}>February</MenuItem>
+                            <MenuItem value={3}>March</MenuItem>
+                            <MenuItem value={4}>April</MenuItem>
+                            <MenuItem value={5}>May</MenuItem>
+                            <MenuItem value={6}>June</MenuItem>
+                            <MenuItem value={7}>July</MenuItem>
+                            <MenuItem value={8}>August</MenuItem>
+                            <MenuItem value={9}>September</MenuItem>
+                            <MenuItem value={10}>October</MenuItem>
+                            <MenuItem value={11}>November</MenuItem>
+                            <MenuItem value={12}>December</MenuItem>
+                        </Select>
+                    </FormControl>
+                </div>
+            </div>
+            <div className='mt-6'>
+                <BarChart
+                    dataset={monthData}
+                    xAxis={[{ scaleType: 'band', dataKey: 'ds' }]}
+                    series={series}
+                    yAxis={[{ label: 'Value' }]}
+                    width={1200}
+                    height={400}
+                />
+            </div>
+        </>
+    );
 }
