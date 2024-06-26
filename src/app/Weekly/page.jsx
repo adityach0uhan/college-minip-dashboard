@@ -6,6 +6,14 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import Button from '@mui/material/Button';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 import product1 from '../../data/json/output/output1.js';
 import product2 from '../../data/json/output/output2.js';
@@ -41,6 +49,7 @@ export default function Page() {
     const [month, setMonth] = useState(new Date().getMonth() + 1); // Default month set to current month (1-indexed)
     const [week, setWeek] = useState(1); // Default week set to first week
     const [weekData, setWeekData] = useState([]);
+    const [view, setView] = useState('chart'); // Default view set to chart
 
     useEffect(() => {
         getData(month, week, selectedProduct); // Fetch data initially for the default month, week, and product
@@ -63,6 +72,10 @@ export default function Page() {
         const selectedWeek = event.target.value;
         setWeek(selectedWeek);
         getData(month, selectedWeek, selectedProduct); // Fetch data for the newly selected week
+    };
+
+    const handleViewChange = () => {
+        setView(view === 'chart' ? 'table' : 'chart');
     };
 
     const series = [
@@ -102,8 +115,10 @@ export default function Page() {
                 return itemDate >= startOfWeek && itemDate < endOfWeek;
             })
             .map((item) => ({
-                ...item,
-                ds: item.ds
+                ds: new Date(item.ds).toLocaleDateString(), // Format date to exclude time
+                yhat: parseFloat(item.yhat.toFixed(1)), // Round values to 1 decimal place
+                yhat_lower: parseFloat(item.yhat_lower.toFixed(1)), // Round values to 1 decimal place
+                yhat_upper: parseFloat(item.yhat_upper.toFixed(1)) // Round values to 1 decimal place
             }));
 
         setWeekData(data);
@@ -111,10 +126,9 @@ export default function Page() {
 
     return (
         <>
-            <div className='w-full text-3xl'>Filters</div>
-            <div className='w-full h-12 mt-7'>
-                <div className='w-2/3 flex gap-5'>
-                    <FormControl fullWidth>
+            <div className='w-full h-12 mt-4'>
+                <div className='w-full flex gap-5 p-2'>
+                    <FormControl className='w-1/4'>
                         <InputLabel id='products-select-label'>
                             Products
                         </InputLabel>
@@ -133,7 +147,7 @@ export default function Page() {
                             )}
                         </Select>
                     </FormControl>
-                    <FormControl fullWidth>
+                    <FormControl className='w-1/4'>
                         <InputLabel id='month-select-label'>Month</InputLabel>
                         <Select
                             labelId='month-select-label'
@@ -150,7 +164,7 @@ export default function Page() {
                             ))}
                         </Select>
                     </FormControl>
-                    <FormControl fullWidth>
+                    <FormControl className='w-1/4'>
                         <InputLabel id='week-select-label'>Week</InputLabel>
                         <Select
                             labelId='week-select-label'
@@ -165,17 +179,64 @@ export default function Page() {
                             ))}
                         </Select>
                     </FormControl>
+                    <Button
+                        variant='outlined'
+                        className='w-1/4 '
+                        onClick={handleViewChange}>
+                        {view === 'chart' ? 'Table View' : 'Chart View'}
+                    </Button>
                 </div>
             </div>
             <div className='mt-10'>
-                <BarChart
-                    dataset={weekData}
-                    xAxis={[{ scaleType: 'band', dataKey: 'ds' }]}
-                    series={series}
-                    yAxis={[{ label: 'Value' }]}
-                    width={1200}
-                    height={400}
-                />
+                {view === 'chart' ? (
+                    <BarChart
+                        dataset={weekData}
+                        xAxis={[{ scaleType: 'band', dataKey: 'ds' }]}
+                        series={series}
+                        yAxis={[{ label: 'Value' }]}
+                        width={1200}
+                        height={400}
+                    />
+                ) : (
+                     <TableContainer
+                component={Paper}
+                className='w-full mt-2 px-10 mx-10 '>
+                <Table aria-label='custom pagination table'>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Date</TableCell>
+                                    <TableCell align='center'>
+                                        Prediction
+                                    </TableCell>
+                                    <TableCell align='center'>
+                                        Lowest Probability
+                                    </TableCell>
+                                    <TableCell align='center'>
+                                        Highest Probability
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {weekData.map((row) => (
+                                    <TableRow key={row.ds}>
+                                        <TableCell component='th' scope='row'>
+                                            {row.ds}
+                                        </TableCell>
+                                        <TableCell align='center'>
+                                            {row.yhat}
+                                        </TableCell>
+                                        <TableCell align='center'>
+                                            {row.yhat_lower}
+                                        </TableCell>
+                                        <TableCell align='center'>
+                                            {row.yhat_upper}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                )}
             </div>
         </>
     );
