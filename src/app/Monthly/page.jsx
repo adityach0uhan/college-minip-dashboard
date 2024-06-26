@@ -6,6 +6,14 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import Button from '@mui/material/Button';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 import product1 from '../../data/json/output/output1.js';
 import product2 from '../../data/json/output/output2.js';
@@ -40,6 +48,7 @@ export default function Page() {
     const [month, setMonth] = useState(new Date().getMonth() + 1); // Default month set to current month (1-indexed)
     const [period, setPeriod] = useState('1-15'); // Default period set to first 15 days
     const [monthData, setMonthData] = useState([]);
+    const [view, setView] = useState('chart'); // Default view set to chart
 
     useEffect(() => {
         getData(month, period, selectedProduct); // Fetch data initially for the default month, period, and product
@@ -62,6 +71,10 @@ export default function Page() {
         const selectedPeriod = event.target.value;
         setPeriod(selectedPeriod);
         getData(month, selectedPeriod, selectedProduct); // Fetch data for the newly selected period
+    };
+
+    const handleViewChange = () => {
+        setView(view === 'chart' ? 'table' : 'chart');
     };
 
     const series = [
@@ -107,8 +120,10 @@ export default function Page() {
                 return itemDate >= startOfPeriod && itemDate < endOfPeriod;
             })
             .map((item) => ({
-                ...item,
-                ds: item.ds
+                ds: new Date(item.ds).toLocaleDateString(), // Format date to exclude time
+                yhat: parseFloat(item.yhat.toFixed(1)), // Round values to 1 decimal place
+                yhat_lower: parseFloat(item.yhat_lower.toFixed(1)), // Round values to 1 decimal place
+                yhat_upper: parseFloat(item.yhat_upper.toFixed(1)) // Round values to 1 decimal place
             }));
 
         setMonthData(data);
@@ -116,69 +131,128 @@ export default function Page() {
 
     return (
         <>
-            <div className='w-full text-3xl'>Filters</div>
-            <div className='w-full h-12 mt-7'>
-                <div className='w-2/3 flex gap-5'>
-                    <FormControl fullWidth>
-                        <InputLabel id='products-select-label'>
-                            Products
-                        </InputLabel>
-                        <Select
-                            labelId='products-select-label'
-                            id='products-select'
-                            value={selectedProduct}
-                            label='Products'
-                            onChange={productChange}>
-                            {Object.keys(productsData).map(
-                                (productKey, index) => (
-                                    <MenuItem key={index} value={productKey}>
-                                        {productKey}
+            <div className='flex w-full flex-col h-full justify-center items-center '>
+                <div className='w-full h-12 flex items-center justify-center m-4 px-4'>
+                    <div className='w-full flex gap-5'>
+                        <FormControl className='w-1/4'>
+                            <InputLabel id='products-select-label'>
+                                Products
+                            </InputLabel>
+                            <Select
+                                labelId='products-select-label'
+                                id='products-select'
+                                value={selectedProduct}
+                                label='Products'
+                                onChange={productChange}>
+                                {Object.keys(productsData).map(
+                                    (productKey, index) => (
+                                        <MenuItem
+                                            key={index}
+                                            value={productKey}>
+                                            {productKey}
+                                        </MenuItem>
+                                    )
+                                )}
+                            </Select>
+                        </FormControl>
+                        <FormControl className='w-1/4'>
+                            <InputLabel id='month-select-label'>
+                                Month
+                            </InputLabel>
+                            <Select
+                                labelId='month-select-label'
+                                id='month-select'
+                                value={month}
+                                label='Month'
+                                onChange={monthChange}>
+                                {Array.from({ length: 12 }, (_, i) => (
+                                    <MenuItem key={i + 1} value={i + 1}>
+                                        {new Date(0, i).toLocaleString(
+                                            'default',
+                                            {
+                                                month: 'long'
+                                            }
+                                        )}
                                     </MenuItem>
-                                )
-                            )}
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth>
-                        <InputLabel id='month-select-label'>Month</InputLabel>
-                        <Select
-                            labelId='month-select-label'
-                            id='month-select'
-                            value={month}
-                            label='Month'
-                            onChange={monthChange}>
-                            {Array.from({ length: 12 }, (_, i) => (
-                                <MenuItem key={i + 1} value={i + 1}>
-                                    {new Date(0, i).toLocaleString('default', {
-                                        month: 'long'
-                                    })}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth>
-                        <InputLabel id='period-select-label'>Period</InputLabel>
-                        <Select
-                            labelId='period-select-label'
-                            id='period-select'
-                            value={period}
-                            label='Period'
-                            onChange={periodChange}>
-                            <MenuItem value='1-15'>1-15</MenuItem>
-                            <MenuItem value='16-30'>16-30</MenuItem>
-                            <MenuItem value='16-end'>16-end</MenuItem>
-                        </Select>
-                    </FormControl>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl className='w-1/4'>
+                            <InputLabel id='period-select-label'>
+                                Period
+                            </InputLabel>
+                            <Select
+                                labelId='period-select-label'
+                                id='period-select'
+                                value={period}
+                                label='Period'
+                                onChange={periodChange}>
+                                <MenuItem value='1-15'>1-15</MenuItem>
+                                <MenuItem value='16-30'>16-30</MenuItem>
+                                <MenuItem value='16-end'>16-end</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <Button
+                            variant='outlined'
+                            className='w-1/4'
+                            onClick={handleViewChange}>
+                            {view === 'chart' ? 'Table View' : 'Chart View'}
+                        </Button>
+                    </div>
                 </div>
-            </div>
-            <div className='mt-6'>
-                <BarChart
-                    dataset={monthData}
-                    xAxis={[{ scaleType: 'band', dataKey: 'ds' }]}
-                    series={series}
-                    yAxis={[{ label: 'Value' }]}
-                    width={1200}
-                    height={400}
-                />
+                <div className='mt-6 flex items-center justify-center'>
+                    {view === 'chart' ? (
+                        <BarChart
+                            dataset={monthData}
+                            xAxis={[{ scaleType: 'band', dataKey: 'ds' }]}
+                            series={series}
+                            yAxis={[{ label: 'Value' }]}
+                            width={1200}
+                            height={400}
+                        />
+                    ) : (
+                        <TableContainer
+                            component={Paper}
+                            className='full px-10 mx-10 '>
+                            <Table aria-label='custom pagination table'>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Date</TableCell>
+                                        <TableCell align='right'>
+                                            Prediction
+                                        </TableCell>
+                                        <TableCell align='right'>
+                                            Lowest Probability
+                                        </TableCell>
+                                        <TableCell align='right'>
+                                            Highest Probability
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {monthData.map((row) => (
+                                        <TableRow key={row.ds}>
+                                            <TableCell
+                                                component='th'
+                                                scope='row'>
+                                                {row.ds}
+                                            </TableCell>
+                                            <TableCell align='right'>
+                                                {row.yhat}
+                                            </TableCell>
+                                            <TableCell align='right'>
+                                                {row.yhat_lower}
+                                            </TableCell>
+                                            <TableCell align='right'>
+                                                {row.yhat_upper}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+                </div>
             </div>
         </>
     );

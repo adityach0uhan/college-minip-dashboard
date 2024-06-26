@@ -11,7 +11,7 @@ import Link from "next/link";
 
 const Sidebar = () => {
   return (
-    <div className="w-48 h-screen bg-white text-black p-2 ">
+    <div className="w-48 h-full sticky  bg-white text-black p-2 ">
       <div className="text-3xl">Sales Prediction</div>
       <ul className="w-full h-96    mt-10 flex items-start  gap-5 justify-center flex-col">
         <li className="w-full h-1/5 flex justify-start items-center pl-2 rounded-lg hover:bg-blue-300 p-2 ">
