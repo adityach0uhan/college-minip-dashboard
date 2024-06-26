@@ -87,66 +87,67 @@ export default function PieChartWithDailyData() {
         setDailyData(dailyData);
     };
 
-    const renderPieCharts = () => {
-        return Object.keys(dailyData).map((key, index) => {
-            const data = dailyData[key];
-            const TOTAL =
-                data.length > 0
-                    ? data.map((item) => item.yhat).reduce((a, b) => a + b, 0)
-                    : 0;
-            const pieData = data.flatMap((item) => [
-                {
-                    label: `${item.ds} (Prediction)`,
-                    value: item.yhat,
-                    color: '#0088FE'
-                },
-                {
-                    label: `${item.ds} (Lowest)`,
-                    value: item.yhat_lower,
-                    color: '#00C49F'
-                },
-                {
-                    label: `${item.ds} (Highest)`,
-                    value: item.yhat_upper,
-                    color: '#FFBB28'
-                }
-            ]);
+   const renderPieCharts = () => {
+       return Object.keys(dailyData).map((key, index) => {
+           const data = dailyData[key];
 
-            return (
-                <div
-                    key={index}
-                    className=' flex mt-5 items-center justify-center  w-44 flex-col h-44 '>
-                    <h3 className='m-0 p-0 w-full text-center h-1/4'>{`Product ${
-                        key.split('Product')[1]
-                    } `}</h3>
-                    {pieData.length > 0 ? (
-                        <PieChart
-                            className='h-3/4 p-0 m-0'
-                            series={[
-                                {
-                                    outerRadius: 200,
-                                    data: pieData,
-                                    arcLabel: (params) =>
-                                        getArcLabel(params, TOTAL)
-                                }
-                            ]}
-                            sx={{
-                                [`& .${pieArcLabelClasses.root}`]: {
-                                    fill: 'white',
-                                    fontSize: 28
-                                }
-                            }}
-                            {...sizing}
-                        />
-                    ) : (
-                        <div>{`No data available for Product ${
-                            key.split('Product')[1]
-                        } on the selected date.`}</div>
-                    )}
-                </div>
-            );
-        });
-    };
+           const pieData = data.flatMap((item) => {
+               const total = item.yhat + item.yhat_lower + item.yhat_upper;
+               return [
+                   {
+                       label: 'Prediction',
+                       value: (item.yhat / total) * 100,
+                       color: '#0088FE'
+                   },
+                   {
+                       label: 'Lowest',
+                       value: (item.yhat_lower / total) * 100,
+                       color: '#00C49F'
+                   },
+                   {
+                       label: 'Highest',
+                       value: (item.yhat_upper / total) * 100,
+                       color: '#FFBB28'
+                   }
+               ];
+           });
+
+           return (
+               <div
+                   key={index}
+                   className='flex mt-5 items-center justify-center w-44 flex-col h-44'>
+                   <h3 className='m-0 p-0 w-full text-center h-1/4'>{`Product ${
+                       key.split('Product')[1]
+                   }`}</h3>
+                   {pieData.length > 0 ? (
+                       <PieChart
+                           className='h-3/4 p-0 m-0'
+                           series={[
+                               {
+                                   outerRadius: 200,
+                                   data: pieData,
+                                   arcLabel: (params) =>
+                                       `${params.value.toFixed(1)}%`
+                               }
+                           ]}
+                           sx={{
+                               [`& .${pieArcLabelClasses.root}`]: {
+                                   fill: 'black',
+                                   fontSize: 32
+                               }
+                           }}
+                           {...sizing}
+                       />
+                   ) : (
+                       <div>{`No data available for Product ${
+                           key.split('Product')[1]
+                       } on the selected date.`}</div>
+                   )}
+               </div>
+           );
+       });
+   };
+
 
     return (
         <>
