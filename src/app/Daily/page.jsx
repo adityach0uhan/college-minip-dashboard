@@ -24,58 +24,79 @@ const getArcLabel = (params, TOTAL) => {
 };
 
 export default function PieChartWithDailyData() {
-    const [products, setProducts] = useState('Product1'); // Default product set to Product1
     const [selectedMonth, setSelectedMonth] = useState(
         new Date().getMonth() + 1
     ); // Default to current month
     const [selectedDay, setSelectedDay] = useState(1); // Default day set to 1
-    const [dailyData, setDailyData] = useState([]);
+    const [dailyDataProduct1, setDailyDataProduct1] = useState([]);
+    const [dailyDataProduct2, setDailyDataProduct2] = useState([]);
 
     useEffect(() => {
-        fetchDailyData(products, selectedMonth, selectedDay); // Fetch data initially for the default product, month, and day
+        fetchDailyData(selectedMonth, selectedDay); // Fetch data initially for the default month and day
     }, []); // Empty dependency array to run once on component mount
-
-    const productChange = (event) => {
-        const selectedProduct = event.target.value;
-        setProducts(selectedProduct);
-        fetchDailyData(selectedProduct, selectedMonth, selectedDay); // Fetch data for the newly selected product, month, and day
-    };
 
     const monthChange = (event) => {
         const selectedMonth = event.target.value;
         setSelectedMonth(selectedMonth);
         setSelectedDay(1); // Reset day to 1
-        fetchDailyData(products, selectedMonth, 1); // Fetch data for the newly selected month and day
+        fetchDailyData(selectedMonth, 1); // Fetch data for the newly selected month and day
     };
 
     const dayChange = (event) => {
         const selectedDay = event.target.value;
         setSelectedDay(selectedDay);
-        fetchDailyData(products, selectedMonth, selectedDay); // Fetch data for the newly selected day
+        fetchDailyData(selectedMonth, selectedDay); // Fetch data for the newly selected day
     };
 
-    const fetchDailyData = (product, month, day) => {
+    const fetchDailyData = (month, day) => {
         const year = new Date().getFullYear();
         const formattedMonth = month.toString().padStart(2, '0');
         const formattedDay = day.toString().padStart(2, '0');
         const datePrefix = `${year}-${formattedMonth}-${formattedDay}`;
 
-        let data = [];
-        if (product === 'Product1') {
-            data = product2.filter((item) => item.ds.startsWith(datePrefix));
-        } else if (product === 'Product2') {
-            data = product3.filter((item) => item.ds.startsWith(datePrefix));
-        }
+        const dataProduct1 = product2.filter((item) =>
+            item.ds.startsWith(datePrefix)
+        );
+        const dataProduct2 = product3.filter((item) =>
+            item.ds.startsWith(datePrefix)
+        );
 
-        setDailyData(data);
+        setDailyDataProduct1(dataProduct1);
+        setDailyDataProduct2(dataProduct2);
     };
 
-    const TOTAL =
-        dailyData.length > 0
-            ? dailyData.map((item) => item.yhat).reduce((a, b) => a + b, 0)
+    const TOTAL1 =
+        dailyDataProduct1.length > 0
+            ? dailyDataProduct1
+                  .map((item) => item.yhat)
+                  .reduce((a, b) => a + b, 0)
+            : 0;
+    const TOTAL2 =
+        dailyDataProduct2.length > 0
+            ? dailyDataProduct2
+                  .map((item) => item.yhat)
+                  .reduce((a, b) => a + b, 0)
             : 0;
 
-    const pieData = dailyData.flatMap((item) => [
+    const pieDataProduct1 = dailyDataProduct1.flatMap((item) => [
+        {
+            label: `${item.ds} (Prediction)`,
+            value: item.yhat,
+            color: '#0088FE'
+        },
+        {
+            label: `${item.ds} (Lowest)`,
+            value: item.yhat_lower,
+            color: '#00C49F'
+        },
+        {
+            label: `${item.ds} (Highest)`,
+            value: item.yhat_upper,
+            color: '#FFBB28'
+        }
+    ]);
+
+    const pieDataProduct2 = dailyDataProduct2.flatMap((item) => [
         {
             label: `${item.ds} (Prediction)`,
             value: item.yhat,
@@ -97,20 +118,6 @@ export default function PieChartWithDailyData() {
         <>
             <div className='w-full h-12 mt-7'>
                 <div className='w-full flex gap-5'>
-                    <FormControl fullWidth>
-                        <InputLabel id='products-select-label'>
-                            Products
-                        </InputLabel>
-                        <Select
-                            labelId='products-select-label'
-                            id='products-select'
-                            value={products}
-                            label='Products'
-                            onChange={productChange}>
-                            <MenuItem value='Product1'>Product 1</MenuItem>
-                            <MenuItem value='Product2'>Product 2</MenuItem>
-                        </Select>
-                    </FormControl>
                     <FormControl fullWidth>
                         <InputLabel id='month-select-label'>Month</InputLabel>
                         <Select
@@ -145,14 +152,16 @@ export default function PieChartWithDailyData() {
                     </FormControl>
                 </div>
             </div>
-            <div className='mt-6'>
-                {pieData.length > 0 ? (
+            <div className='mt-6 flex gap-1'>
+                <h3>Product 1 Data</h3>
+                {pieDataProduct1.length > 0 ? (
                     <PieChart
                         series={[
                             {
                                 outerRadius: 80,
-                                data: pieData,
-                                arcLabel: (params) => getArcLabel(params, TOTAL)
+                                data: pieDataProduct1,
+                                arcLabel: (params) =>
+                                    getArcLabel(params, TOTAL1)
                             }
                         ]}
                         sx={{
@@ -164,8 +173,50 @@ export default function PieChartWithDailyData() {
                         {...sizing}
                     />
                 ) : (
-                    <div>No data available for the selected date.</div>
+                    <div>
+                        No data available for Product 1 on the selected date.
+                    </div>
                 )}
+                <h3>Product 2 Data</h3>
+                {pieDataProduct2.length > 0 ? (
+                    <PieChart
+                        series={[
+                            {
+                                outerRadius: 80,
+                                data: pieDataProduct2,
+                                arcLabel: (params) =>
+                                    getArcLabel(params, TOTAL2)
+                            }
+                        ]}
+                        sx={{
+                            [`& .${pieArcLabelClasses.root}`]: {
+                                fill: 'white',
+                                fontSize: 14
+                            }
+                        }}
+                        {...sizing}
+                    />
+                ) : (
+                    <div>
+                        No data available for Product 2 on the selected date.
+                    </div>
+                )}
+            </div>
+            <div className='mt-6'>
+                <h3>Color Indicators</h3>
+                <ul>
+                    <li>
+                        <span style={{ color: '#0088FE' }}>■</span> Prediction
+                    </li>
+                    <li>
+                        <span style={{ color: '#00C49F' }}>■</span> Lowest
+                        Probability
+                    </li>
+                    <li>
+                        <span style={{ color: '#FFBB28' }}>■</span> Highest
+                        Probability
+                    </li>
+                </ul>
             </div>
         </>
     );
