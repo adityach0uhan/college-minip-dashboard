@@ -6,8 +6,32 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+
+import product1 from '../../data/json/output/output1.js';
 import product2 from '../../data/json/output/output2.js';
 import product3 from '../../data/json/output/output3.js';
+import product4 from '../../data/json/output/output4.js';
+import product5 from '../../data/json/output/output5.js';
+import product6 from '../../data/json/output/output6.js';
+import product7 from '../../data/json/output/output7.js';
+import product8 from '../../data/json/output/output8.js';
+import product9 from '../../data/json/output/output9.js';
+import product10 from '../../data/json/output/output10.js';
+import product11 from '../../data/json/output/output11.js';
+
+const productsData = {
+    Product1: product1,
+    Product2: product2,
+    Product3: product3,
+    Product4: product4,
+    Product5: product5,
+    Product6: product6,
+    Product7: product7,
+    Product8: product8,
+    Product9: product9,
+    Product10: product10,
+    Product11: product11
+};
 
 const valueFormatter = (value) => value.toFixed(1);
 
@@ -28,8 +52,7 @@ export default function PieChartWithDailyData() {
         new Date().getMonth() + 1
     ); // Default to current month
     const [selectedDay, setSelectedDay] = useState(1); // Default day set to 1
-    const [dailyDataProduct1, setDailyDataProduct1] = useState([]);
-    const [dailyDataProduct2, setDailyDataProduct2] = useState([]);
+    const [dailyData, setDailyData] = useState({});
 
     useEffect(() => {
         fetchDailyData(selectedMonth, selectedDay); // Fetch data initially for the default month and day
@@ -54,65 +77,71 @@ export default function PieChartWithDailyData() {
         const formattedDay = day.toString().padStart(2, '0');
         const datePrefix = `${year}-${formattedMonth}-${formattedDay}`;
 
-        const dataProduct1 = product2.filter((item) =>
-            item.ds.startsWith(datePrefix)
-        );
-        const dataProduct2 = product3.filter((item) =>
-            item.ds.startsWith(datePrefix)
-        );
+        const dailyData = {};
+        Object.keys(productsData).forEach((key) => {
+            dailyData[key] = productsData[key].filter((item) =>
+                item.ds.startsWith(datePrefix)
+            );
+        });
 
-        setDailyDataProduct1(dataProduct1);
-        setDailyDataProduct2(dataProduct2);
+        setDailyData(dailyData);
     };
 
-    const TOTAL1 =
-        dailyDataProduct1.length > 0
-            ? dailyDataProduct1
-                  .map((item) => item.yhat)
-                  .reduce((a, b) => a + b, 0)
-            : 0;
-    const TOTAL2 =
-        dailyDataProduct2.length > 0
-            ? dailyDataProduct2
-                  .map((item) => item.yhat)
-                  .reduce((a, b) => a + b, 0)
-            : 0;
+    const renderPieCharts = () => {
+        return Object.keys(dailyData).map((key, index) => {
+            const data = dailyData[key];
+            const TOTAL =
+                data.length > 0
+                    ? data.map((item) => item.yhat).reduce((a, b) => a + b, 0)
+                    : 0;
+            const pieData = data.flatMap((item) => [
+                {
+                    label: `${item.ds} (Prediction)`,
+                    value: item.yhat,
+                    color: '#0088FE'
+                },
+                {
+                    label: `${item.ds} (Lowest)`,
+                    value: item.yhat_lower,
+                    color: '#00C49F'
+                },
+                {
+                    label: `${item.ds} (Highest)`,
+                    value: item.yhat_upper,
+                    color: '#FFBB28'
+                }
+            ]);
 
-    const pieDataProduct1 = dailyDataProduct1.flatMap((item) => [
-        {
-            label: `${item.ds} (Prediction)`,
-            value: item.yhat,
-            color: '#0088FE'
-        },
-        {
-            label: `${item.ds} (Lowest)`,
-            value: item.yhat_lower,
-            color: '#00C49F'
-        },
-        {
-            label: `${item.ds} (Highest)`,
-            value: item.yhat_upper,
-            color: '#FFBB28'
-        }
-    ]);
-
-    const pieDataProduct2 = dailyDataProduct2.flatMap((item) => [
-        {
-            label: `${item.ds} (Prediction)`,
-            value: item.yhat,
-            color: '#0088FE'
-        },
-        {
-            label: `${item.ds} (Lowest)`,
-            value: item.yhat_lower,
-            color: '#00C49F'
-        },
-        {
-            label: `${item.ds} (Highest)`,
-            value: item.yhat_upper,
-            color: '#FFBB28'
-        }
-    ]);
+            return (
+                <div key={index} className='mt-6'>
+                    <h3>{`Product ${key.split('Product')[1]} Data`}</h3>
+                    {pieData.length > 0 ? (
+                        <PieChart
+                            series={[
+                                {
+                                    outerRadius: 80,
+                                    data: pieData,
+                                    arcLabel: (params) =>
+                                        getArcLabel(params, TOTAL)
+                                }
+                            ]}
+                            sx={{
+                                [`& .${pieArcLabelClasses.root}`]: {
+                                    fill: 'white',
+                                    fontSize: 14
+                                }
+                            }}
+                            {...sizing}
+                        />
+                    ) : (
+                        <div>{`No data available for Product ${
+                            key.split('Product')[1]
+                        } on the selected date.`}</div>
+                    )}
+                </div>
+            );
+        });
+    };
 
     return (
         <>
@@ -152,56 +181,7 @@ export default function PieChartWithDailyData() {
                     </FormControl>
                 </div>
             </div>
-            <div className='mt-6 flex gap-1'>
-                <h3>Product 1 Data</h3>
-                {pieDataProduct1.length > 0 ? (
-                    <PieChart
-                        series={[
-                            {
-                                outerRadius: 80,
-                                data: pieDataProduct1,
-                                arcLabel: (params) =>
-                                    getArcLabel(params, TOTAL1)
-                            }
-                        ]}
-                        sx={{
-                            [`& .${pieArcLabelClasses.root}`]: {
-                                fill: 'white',
-                                fontSize: 14
-                            }
-                        }}
-                        {...sizing}
-                    />
-                ) : (
-                    <div>
-                        No data available for Product 1 on the selected date.
-                    </div>
-                )}
-                <h3>Product 2 Data</h3>
-                {pieDataProduct2.length > 0 ? (
-                    <PieChart
-                        series={[
-                            {
-                                outerRadius: 80,
-                                data: pieDataProduct2,
-                                arcLabel: (params) =>
-                                    getArcLabel(params, TOTAL2)
-                            }
-                        ]}
-                        sx={{
-                            [`& .${pieArcLabelClasses.root}`]: {
-                                fill: 'white',
-                                fontSize: 14
-                            }
-                        }}
-                        {...sizing}
-                    />
-                ) : (
-                    <div>
-                        No data available for Product 2 on the selected date.
-                    </div>
-                )}
-            </div>
+            <div className='mt-6 flex flex-wrap gap-5'>{renderPieCharts()}</div>
             <div className='mt-6'>
                 <h3>Color Indicators</h3>
                 <ul>
