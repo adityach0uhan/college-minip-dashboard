@@ -11,33 +11,35 @@ import product3 from '../../data/json/output/output3.js';
 
 const valueFormatter = (value) => value.toFixed(1);
 
+const weeksInMonth = 4;
+
 export default function Page() {
     const [products, setProducts] = useState('Product1'); // Default product set to Product1
     const [month, setMonth] = useState(new Date().getMonth() + 1); // Default month set to current month (1-indexed)
-    const [period, setPeriod] = useState('1-15'); // Default period set to first 15 days
-    const [monthData, setMonthData] = useState([]);
+    const [week, setWeek] = useState(1); // Default week set to first week
+    const [weekData, setWeekData] = useState([]);
 
     useEffect(() => {
-        getData(month, period); // Fetch data initially for the default month and period
+        getData(month, week); // Fetch data initially for the default month and week
     }, []); // Empty dependency array to run once on component mount
 
     const productChange = (event) => {
         const selectedProduct = event.target.value;
         setProducts(selectedProduct);
-        getData(month, period); // Fetch data for the newly selected product
+        getData(month, week); // Fetch data for the newly selected product
     };
 
     const monthChange = (event) => {
         const selectedMonth = event.target.value;
         setMonth(selectedMonth);
-        setPeriod('1-15'); // Reset period to first 15 days of the selected month
-        getData(selectedMonth, '1-15'); // Fetch data for the newly selected month and first period
+        setWeek(1); // Reset week to first week of the selected month
+        getData(selectedMonth, 1); // Fetch data for the newly selected month and first week
     };
 
-    const periodChange = (event) => {
-        const selectedPeriod = event.target.value;
-        setPeriod(selectedPeriod);
-        getData(month, selectedPeriod); // Fetch data for the newly selected period
+    const weekChange = (event) => {
+        const selectedWeek = event.target.value;
+        setWeek(selectedWeek);
+        getData(month, selectedWeek); // Fetch data for the newly selected week
     };
 
     const series = [
@@ -58,31 +60,21 @@ export default function Page() {
         }
     ];
 
-    const getData = (selectedMonth, selectedPeriod) => {
+    const getData = (selectedMonth, selectedWeek) => {
         const year = new Date().getFullYear();
-        let startDay = 1;
-        let endDay = 15;
-
-        if (selectedPeriod === '16-30') {
-            startDay = 16;
-            endDay = 30;
-        } else if (selectedPeriod === '1-15') {
-            startDay = 1;
-            endDay = 15;
-        } else if (selectedPeriod === '16-end') {
-            startDay = 16;
-            endDay = new Date(year, selectedMonth, 0).getDate(); // Get the last day of the month
-        }
-
-        const startOfPeriod = new Date(year, selectedMonth - 1, startDay);
-        const endOfPeriod = new Date(year, selectedMonth - 1, endDay + 1); // End date is exclusive
+        const startOfWeek = new Date(
+            year,
+            selectedMonth - 1,
+            (selectedWeek - 1) * 7 + 1
+        );
+        const endOfWeek = new Date(year, selectedMonth - 1, selectedWeek * 7);
 
         let data = [];
         if (products === 'Product1') {
             data = product2
                 .filter((item) => {
                     const itemDate = new Date(item.ds);
-                    return itemDate >= startOfPeriod && itemDate < endOfPeriod;
+                    return itemDate >= startOfWeek && itemDate < endOfWeek;
                 })
                 .map((item) => ({
                     ...item,
@@ -92,7 +84,7 @@ export default function Page() {
             data = product3
                 .filter((item) => {
                     const itemDate = new Date(item.ds);
-                    return itemDate >= startOfPeriod && itemDate < endOfPeriod;
+                    return itemDate >= startOfWeek && itemDate < endOfWeek;
                 })
                 .map((item) => ({
                     ...item,
@@ -100,14 +92,14 @@ export default function Page() {
                 }));
         }
 
-        setMonthData(data);
+        setWeekData(data);
     };
 
     return (
         <>
             <div className='w-full text-3xl'>Filters </div>
             <div className='w-full h-12 mt-7 '>
-                <div className='w-2/3 flex gap-5'>
+                <div className='w-2/3 flex  gap-5'>
                     <FormControl fullWidth>
                         <InputLabel id='products-select-label'>
                             Products
@@ -145,22 +137,25 @@ export default function Page() {
                         </Select>
                     </FormControl>
                     <FormControl fullWidth>
-                        <InputLabel id='period-select-label'>Period</InputLabel>
+                        <InputLabel id='week-select-label'>Week</InputLabel>
                         <Select
-                            labelId='period-select-label'
-                            id='period-select'
-                            value={period}
-                            label='Period'
-                            onChange={periodChange}>
-                            <MenuItem value='1-15'>1-15</MenuItem>
-                            <MenuItem value='16-end'>16-end</MenuItem>
+                            labelId='week-select-label'
+                            id='week-select'
+                            value={week}
+                            label='Week'
+                            onChange={weekChange}>
+                            {[...Array(weeksInMonth).keys()].map((i) => (
+                                <MenuItem key={i + 1} value={i + 1}>
+                                    Week {i + 1}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
                 </div>
             </div>
-            <div className='mt-6'>
+            <div className='mt-10'>
                 <BarChart
-                    dataset={monthData}
+                    dataset={weekData}
                     xAxis={[{ scaleType: 'band', dataKey: 'ds' }]}
                     series={series}
                     yAxis={[{ label: 'Value' }]}

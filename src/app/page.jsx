@@ -19,7 +19,7 @@ const page = () => {
                                 <Button variant='contained'>
                                     <Link
                                         className='w-full items-center justify-around h-full flex gap-2'
-                                        href='/Monthly'>
+                                        href='/Daily'>
                                         Daily Data <SendIcon />
                                     </Link>
                                 </Button>
@@ -56,13 +56,13 @@ const page = () => {
                                 Weekly
                             </div>
                             <div class='line-clamp-3 '>
-                                <div>View Monthly Product </div>
+                                <div>View Weekly Product </div>
                                 <br />
                                 <Button variant='contained'>
                                     <Link
                                         className='w-full items-center justify-around h-full flex gap-2'
-                                        href='/Monthly'>
-                                        Monthly Data <SendIcon />
+                                        href='/Weekly'>
+                                        Weekly Data <SendIcon />
                                     </Link>
                                 </Button>
                             </div>

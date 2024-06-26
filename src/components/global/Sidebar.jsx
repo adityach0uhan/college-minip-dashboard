@@ -15,7 +15,7 @@ const Sidebar = () => {
       <div className="text-3xl">Sales Prediction</div>
       <ul className="w-full h-96    mt-10 flex items-start  gap-5 justify-center flex-col">
         <li className="w-full h-1/5 flex justify-start items-center pl-2 rounded-lg hover:bg-blue-300 p-2 ">
-          <Link className="flex w-full h-full items-center gap-5" href="/daily">
+          <Link className="flex w-full h-full items-center gap-5" href="/Daily">
             <CalendarDays />
             Daily
           </Link>
