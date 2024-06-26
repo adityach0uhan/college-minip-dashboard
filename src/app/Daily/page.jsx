@@ -113,13 +113,18 @@ export default function PieChartWithDailyData() {
             ]);
 
             return (
-                <div key={index} className='mt-6'>
-                    <h3>{`Product ${key.split('Product')[1]} Data`}</h3>
+                <div
+                    key={index}
+                    className=' flex mt-5 items-center justify-center  w-44 flex-col h-44 '>
+                    <h3 className='m-0 p-0 w-full text-center h-1/4'>{`Product ${
+                        key.split('Product')[1]
+                    } `}</h3>
                     {pieData.length > 0 ? (
                         <PieChart
+                            className='h-3/4 p-0 m-0'
                             series={[
                                 {
-                                    outerRadius: 80,
+                                    outerRadius: 200,
                                     data: pieData,
                                     arcLabel: (params) =>
                                         getArcLabel(params, TOTAL)
@@ -128,7 +133,7 @@ export default function PieChartWithDailyData() {
                             sx={{
                                 [`& .${pieArcLabelClasses.root}`]: {
                                     fill: 'white',
-                                    fontSize: 14
+                                    fontSize: 28
                                 }
                             }}
                             {...sizing}
@@ -145,8 +150,8 @@ export default function PieChartWithDailyData() {
 
     return (
         <>
-            <div className='w-full h-12 mt-7'>
-                <div className='w-full flex gap-5'>
+            <div className='w-full h-12 m-3'>
+                <div className='w-1/2 flex gap-5'>
                     <FormControl fullWidth>
                         <InputLabel id='month-select-label'>Month</InputLabel>
                         <Select
@@ -181,10 +186,8 @@ export default function PieChartWithDailyData() {
                     </FormControl>
                 </div>
             </div>
-            <div className='mt-6 flex flex-wrap gap-5'>{renderPieCharts()}</div>
-            <div className='mt-6'>
-                <h3>Color Indicators</h3>
-                <ul>
+            <div className=''>
+                <ul className='flex gap-7 mt-2'>
                     <li>
                         <span style={{ color: '#0088FE' }}>■</span> Prediction
                     </li>
@@ -198,6 +201,7 @@ export default function PieChartWithDailyData() {
                     </li>
                 </ul>
             </div>
+            <div className=' flex-wrap gap-3 flex '>{renderPieCharts()}</div>
         </>
     );
 }
