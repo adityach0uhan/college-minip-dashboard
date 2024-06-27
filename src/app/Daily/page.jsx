@@ -152,7 +152,7 @@ export default function PieChartWithDailyData() {
                             {...sizing}
                         />
                     ) : (
-                        <div>{`No data available for Product ${
+                        <div className='text-sm'>{`No data available for Product ${
                             key.split('Product')[1]
                         } on the selected date.`}</div>
                     )}
