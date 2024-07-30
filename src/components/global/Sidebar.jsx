@@ -29,11 +29,6 @@ const Sidebar = () => {
             route: '/Monthly',
             icon: <CalendarClock />,
             title: 'Monthly'
-        },
-        {
-            route: '/logout',
-            icon: <LogOut />,
-            title: 'Logout'
         }
     ];
 
